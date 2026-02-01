@@ -1,12 +1,16 @@
 import express from "express"
 import mongoose from "mongoose"
 import bodyParser from "body-parser"
-import dns from "node:dns";
+import dotenv from "dotenv"
+dotenv.config()
+
 import userRouter from "./routers/userRouter.js";
 import jwt from "jsonwebtoken"
 import productRouter from "./routers/productRouter.js";
 
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
+import dns from "node:dns";
+
 
 
 
@@ -21,7 +25,7 @@ app.use((req,res,next)=>{
   const value = req.header("Authorization")
   if(value != null){
     const token = value.replace("Bearer ","")
-    jwt.verify(token,"cbc-6503",(err,decoded)=>{
+    jwt.verify(token,process.env.JWT_TOKEN,(err,decoded)=>{
         if(decoded == null){
             res.status(403).json({
                 message: "unauthorized"
@@ -40,19 +44,20 @@ app.use((req,res,next)=>{
   
 })
 
-const connectionString = "mongodb+srv://thilakshithapriyangana2001_db_user:7OSA8pVgGezpQakk@cluster11.yano9m8.mongodb.net/?appName=Cluster11";
+const connectionString = process.env.MONGO_URI
 
 
 mongoose.connect(connectionString).then(()=>{
     console.log("db connected")
-}).catch(()=>{
+}).catch((e)=>{
+    console.log(e)
     console.log("not connected")
 })
 
 
 
-app.use("/users",userRouter)
-app.use("/products",productRouter)
+app.use("/api/users",userRouter)
+app.use("/api/products",productRouter)
 
 
 
